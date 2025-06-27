@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useMemo } from 'react';
 import { HealthColors } from '@/constants/Colors';
 
 export type ColorScheme = 'light' | 'dark';
@@ -6,13 +7,19 @@ export type ThemeColors = typeof HealthColors.light;
 
 export function useTheme() {
   const colorScheme = useColorScheme() ?? 'light';
-  const colors = HealthColors[colorScheme];
   
-  return {
+  // ✅ Utiliser useMemo pour éviter les re-calculs constants
+  const colors = useMemo(() => HealthColors[colorScheme], [colorScheme]);
+  
+  const isDark = useMemo(() => colorScheme === 'dark', [colorScheme]);
+  const isLight = useMemo(() => colorScheme === 'light', [colorScheme]);
+  
+  // ✅ Mémoriser l'objet retourné pour éviter les re-renders
+  return useMemo(() => ({
     colors,
     colorScheme,
-    isDark: colorScheme === 'dark',
-    isLight: colorScheme === 'light',
+    isDark,
+    isLight,
     
     // Helpers pour obtenir des couleurs dynamiques
     getColor: (colorName: keyof ThemeColors) => colors[colorName],
@@ -29,7 +36,7 @@ export function useTheme() {
       warning: colors.warning,
       info: colors.info,
     }
-  };
+  }), [colors, colorScheme, isDark, isLight]);
 }
 
 // Hook pour les couleurs de thème (compatible avec l'ancien système)
