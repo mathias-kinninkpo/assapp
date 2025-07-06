@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
@@ -11,7 +11,9 @@ import { useAuthStore } from '@/stores/authStore';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const router = useRouter();
+  const segments = useSegments();
+  const { isAuthenticated, onboardingCompleted } = useAuthStore();
   const [isAppReady, setIsAppReady] = useState(false);
   
   const [loaded] = useFonts({
@@ -21,12 +23,28 @@ export default function RootLayout() {
   // Attendre que les fonts et l'état d'auth soient prêts
   useEffect(() => {
     if (loaded) {
-      // Petit délai pour laisser Zustand se rehydrater depuis AsyncStorage
       setTimeout(() => {
         setIsAppReady(true);
-      }, 500); // Augmenté à 500ms pour être sûr
+      }, 500);
     }
   }, [loaded]);
+
+  // Gestion de la navigation - SIMPLIFIÉE pour éviter la redirection automatique
+  useEffect(() => {
+    if (!isAppReady) return;
+
+    const inAuthGroup = segments[0] === '(tabs)';
+
+    // Seulement rediriger si utilisateur connecté et pas dans l'app
+    if (isAuthenticated && !inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+    // Sinon, laisser l'utilisateur naviguer manuellement
+    else if (!isAuthenticated && !onboardingCompleted && segments.length === 0) {
+      // Seulement au tout premier lancement → onboarding
+      router.replace('/onboarding');
+    }
+  }, [isAuthenticated, isAppReady, segments]);
 
   // Écran de chargement pendant que l'app s'initialise
   if (!isAppReady) {
@@ -43,15 +61,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        {/* ✅ Toujours définir toutes les routes mais avec initialRouteName conditionnel */}
-        <Stack.Screen 
-          name="login" 
-          options={{ 
-            headerShown: false,
-            // Empêcher le retour vers login si connecté
-            gestureEnabled: !isAuthenticated,
-          }} 
-        />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="firstLogin" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>

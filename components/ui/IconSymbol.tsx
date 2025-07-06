@@ -18,6 +18,7 @@ const MAPPING: Record<string, MaterialIconName> = {
   'doc.text.fill': 'description', // Réclamations
   'shield.fill': 'security', // Polices d'assurance
   'gear.fill': 'settings', // Paramètres
+  'medical.kit.fill': 'local-hospital', // Prestataires de santé
 };
 
 // Type pour les noms d'icônes que nous supportons

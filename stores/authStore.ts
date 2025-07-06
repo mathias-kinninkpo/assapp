@@ -21,11 +21,17 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   
+  // État d'onboarding - NOUVEAU
+  onboardingCompleted: boolean;
+  
   // Actions
   login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
   firstConnection: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  
+  // Actions onboarding - NOUVEAU
+  setOnboardingCompleted: (completed: boolean) => void;
   
   // Helpers
   getFullName: () => string;
@@ -236,6 +242,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      onboardingCompleted: false, // NOUVEAU
 
       // Action de connexion
       login: async (identifier: string, password: string) => {
@@ -300,12 +307,18 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isAuthenticated: false,
           isLoading: false,
+          // Note: on garde onboardingCompleted à true pour éviter de refaire l'onboarding
         });
       },
 
       // Setter pour isLoading
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
+      },
+
+      // Gestion de l'onboarding - NOUVEAU
+      setOnboardingCompleted: (completed: boolean) => {
+        set({ onboardingCompleted: completed });
       },
 
       // Helper pour obtenir le nom complet
@@ -329,10 +342,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage', // Nom pour AsyncStorage
       storage: createJSONStorage(() => AsyncStorage),
-      // Persister seulement les données importantes
+      // Persister les données importantes + onboardingCompleted
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        onboardingCompleted: state.onboardingCompleted, // NOUVEAU
       }),
     }
   )

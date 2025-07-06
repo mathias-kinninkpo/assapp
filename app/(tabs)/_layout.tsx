@@ -63,9 +63,19 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="providers"
+        options={{
+          title: 'Prestataires',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="medical.kit.fill" color={color} />
+          ),
+        }}
+      />
       
        {/* Paramètres */}
-       <Tabs.Screen
+       <Tabs.Screen 
         name="setting"
         options={{
           title: 'Paramètres',

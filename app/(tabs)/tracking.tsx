@@ -297,7 +297,7 @@ export default function DocumentsTrackingScreen() {
       </View>
 
       {/* Actions flottantes en bas */}
-      {user && documents.length > 0 && (
+      {user && documents.length > 0 && ( 
         <View className="absolute bottom-6 right-6">
           <Pressable
             onPress={handleCreateNewDocument}
